@@ -1,0 +1,48 @@
+name: workshop_demo_app
+description: A Sneakers App - Flutter
+#  @CodeWithFlexz on Instagram
+#  AmirBayat0 on Github
+# Programming with Flexz on Youtube
+
+publish_to: "none"
+
+version: 0.0.1+1
+
+environment:
+  sdk: '>=3.0.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.5
+  custom_navigation_bar: ^0.8.2
+  font_awesome_flutter: ^10.5.0
+  simple_animations: ^4.0.2
+  supercharged: ^2.1.1
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/images/payment_modes/
+
+  fonts:
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-Bold.ttf
+          weight: 700
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Regular.ttf
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 700
