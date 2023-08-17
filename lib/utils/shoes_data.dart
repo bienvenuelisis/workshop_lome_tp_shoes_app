@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:workshop_demo_app/models/shoe.dart';
+import 'package:workshop_lome_tp_shoes_app/models/shoe.dart';
 
 final List<Shoe> availableShoes = [
   const Shoe(

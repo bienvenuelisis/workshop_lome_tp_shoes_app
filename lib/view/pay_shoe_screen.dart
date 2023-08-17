@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paygateglobal/flutter_paygateglobal.dart';
-import 'package:workshop_demo_app/models/shoe.dart';
-import 'package:workshop_demo_app/utils/constants.dart';
-import 'package:workshop_demo_app/utils/context.dart';
-import 'package:workshop_demo_app/utils/int_extension.dart';
-import 'package:workshop_demo_app/utils/mobile_operator.dart';
-import 'package:workshop_demo_app/utils/paygate_extensions.dart';
-import 'package:workshop_demo_app/utils/text.dart';
-import 'package:workshop_demo_app/utils/text_formatter.dart';
+import 'package:workshop_lome_tp_shoes_app/models/shoe.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/constants.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/context.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/int_extension.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/mobile_operator.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/paygate_extensions.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/text.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/text_formatter.dart';
 
 class PayShoeScreen extends StatefulWidget {
   const PayShoeScreen({super.key, required this.shoe});

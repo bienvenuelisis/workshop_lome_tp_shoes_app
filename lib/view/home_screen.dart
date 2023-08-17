@@ -1,13 +1,13 @@
 // ignore_for_file: prefer_const_constructors, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
-import 'package:workshop_demo_app/animation/fade_animation.dart';
-import 'package:workshop_demo_app/models/shoe.dart';
-import 'package:workshop_demo_app/theme/custom_app_theme.dart';
-import 'package:workshop_demo_app/utils/constants.dart';
-import 'package:workshop_demo_app/utils/int_extension.dart';
-import 'package:workshop_demo_app/utils/shoes_data.dart';
-import 'package:workshop_demo_app/view/detail_screen.dart';
+import 'package:workshop_lome_tp_shoes_app/animation/fade_animation.dart';
+import 'package:workshop_lome_tp_shoes_app/models/shoe.dart';
+import 'package:workshop_lome_tp_shoes_app/theme/custom_app_theme.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/constants.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/int_extension.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/shoes_data.dart';
+import 'package:workshop_lome_tp_shoes_app/view/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

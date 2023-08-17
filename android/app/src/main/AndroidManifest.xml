@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.workshop_demo_app">
+    package="com.example.workshop_lome_tp_shoes_app">
    <application
-        android:label="workshop_demo_app"
+        android:label="workshop_lome_tp_shoes_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

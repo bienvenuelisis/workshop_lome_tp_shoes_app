@@ -1,12 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, must_be_immutable, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
-import 'package:workshop_demo_app/animation/fade_animation.dart';
-import 'package:workshop_demo_app/models/shoe.dart';
-import 'package:workshop_demo_app/theme/custom_app_theme.dart';
-import 'package:workshop_demo_app/utils/constants.dart';
-import 'package:workshop_demo_app/utils/int_extension.dart';
-import 'package:workshop_demo_app/view/pay_shoe_screen.dart';
+import 'package:workshop_lome_tp_shoes_app/animation/fade_animation.dart';
+import 'package:workshop_lome_tp_shoes_app/models/shoe.dart';
+import 'package:workshop_lome_tp_shoes_app/theme/custom_app_theme.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/constants.dart';
+import 'package:workshop_lome_tp_shoes_app/utils/int_extension.dart';
+import 'package:workshop_lome_tp_shoes_app/view/pay_shoe_screen.dart';
 
 class DetailsScreen extends StatefulWidget {
   DetailsScreen({required this.model, required this.isComeFromMoreSection});

@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:workshop_demo_app/view/home_screen.dart';
+import 'package:workshop_lome_tp_shoes_app/view/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
