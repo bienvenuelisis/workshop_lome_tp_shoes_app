@@ -26,5 +26,8 @@
         "titleBar.inactiveBackground": "#0a202099",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#0a2020"
+    "peacock.color": "#0a2020",
+    "cSpell.words": [
+        "Paygate"
+    ]
 }
