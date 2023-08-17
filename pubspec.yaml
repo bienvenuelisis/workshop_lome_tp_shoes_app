@@ -17,6 +17,7 @@ dependencies:
 
   cupertino_icons: ^1.0.5
   custom_navigation_bar: ^0.8.2
+  flutter_paygateglobal: ^0.1.3
   font_awesome_flutter: ^10.5.0
   simple_animations: ^4.0.2
   supercharged: ^2.1.1

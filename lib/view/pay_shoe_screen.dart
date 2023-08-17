@@ -1,17 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:workshop_demo_app/models/paygate_request.dart';
-import 'package:workshop_demo_app/models/paygate_response.dart';
+import 'package:flutter_paygateglobal/flutter_paygateglobal.dart';
 import 'package:workshop_demo_app/models/shoe.dart';
 import 'package:workshop_demo_app/utils/constants.dart';
 import 'package:workshop_demo_app/utils/context.dart';
 import 'package:workshop_demo_app/utils/int_extension.dart';
 import 'package:workshop_demo_app/utils/mobile_operator.dart';
+import 'package:workshop_demo_app/utils/paygate_extensions.dart';
+import 'package:workshop_demo_app/utils/text.dart';
 import 'package:workshop_demo_app/utils/text_formatter.dart';
-
-const String authToken = "08b9094a-79af-48e1-9523-2eb21354d301";
 
 class PayShoeScreen extends StatefulWidget {
   const PayShoeScreen({super.key, required this.shoe});
@@ -28,8 +24,10 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
 
   bool _loading = false;
 
-  PaygateRequest? _paygateRequest;
-  PaygateResponse? _paygateResponse;
+  bool _openPaygatePage = false;
+
+  NewTransactionResponse? _paygateResponse;
+  Transaction? _transaction;
 
   @override
   void dispose() {
@@ -40,13 +38,15 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
 
   @override
   void initState() {
+    Paygate.init(apiKey: "08b9094a-79af-48e1-9523-2eb21354d301");
     _numberController.addListener(_updateOperator);
     super.initState();
   }
 
   MobileOperator get operator => _numberController.text.operator;
+  String get phoneNumber => _numberController.text.replaceAll(" ", "");
 
-  Future<void> pay() async {
+  Future<void> payV1() async {
     if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
       return;
     }
@@ -54,24 +54,41 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
     setState(() {
       _loading = true;
     });
+
     try {
-      http.Response response = await http.post(
-        Uri.parse("https://paygateglobal.com/api/v1/pay"),
-        body: {
-          "auth_token": authToken,
-          "phone_number": "90495033", //"90495033"
-          "amount": "1",
-          "description": "Paiement de chaussures",
-          "identifier": "shoes-1-pay-user-07",
-          "network": "TMONEY"
-        },
+      _paygateResponse = await Paygate.payV1(
+        //amount: widget.shoe.price.toDouble(),
+        amount: 1,
+        provider: operator.provider,
+        description: "Paiement de chaussure ${widget.shoe.name}",
+        phoneNumber: phoneNumber,
       );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
 
-      Map<String, dynamic> data = jsonDecode(response.body);
+    setState(() {
+      _loading = false;
+    });
+  }
 
-      setState(() {
-        _paygateRequest = PaygateRequest.fromJson(data);
-      });
+  Future<void> payV2() async {
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      _paygateResponse = await Paygate.payV2(
+        //amount: widget.shoe.price.toDouble(),
+        amount: 1,
+        provider: operator.provider,
+        description: "Paiement de chaussure ${widget.shoe.name}",
+        phoneNumber: phoneNumber,
+      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -82,24 +99,18 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
   }
 
   Future<void> verify() async {
+    if (_paygateResponse == null) {
+      return;
+    }
+
     setState(() {
-      _loading = false;
+      _loading = true;
     });
 
     try {
-      http.Response response = await http.post(
-        Uri.parse("https://paygateglobal.com/api/v1/status"),
-        body: {
-          "auth_token": authToken.toString(),
-          "tx_reference": _paygateRequest?.txRef.toString(),
-        },
+      _transaction = await Paygate.verifyTransaction(
+        txReference: _paygateResponse!.txReference,
       );
-
-      Map<String, dynamic> data = jsonDecode(response.body);
-
-      setState(() {
-        _paygateResponse = PaygateResponse.fromJson(data);
-      });
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -159,42 +170,86 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
                     return null;
                   },
                 ),
+                //Switch
+                const SizedBox(height: 20),
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      const Text(
+                        "Ouvrir une page externe de paiement",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Switch(
+                        activeColor: AppConstantsColor.materialButtonColor,
+                        value: _openPaygatePage,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _openPaygatePage = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 50),
+
                 _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : (_paygateRequest == null || _paygateRequest!.status != 0)
-                        ? MaterialButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            minWidth: context.width / 1.2,
-                            height: context.height / 15,
-                            color: Colors.pink,
-                            onPressed: pay,
-                            child: Text(
-                              "PAYER ${widget.shoe.price.formatted}",
-                              style: const TextStyle(
-                                color: AppConstantsColor.lightTextColor,
-                                fontSize: 24,
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : (_paygateResponse?.ok ?? false)
+                        ? (_transaction?.done ?? false)
+                            ? const SizedBox.shrink()
+                            : MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                minWidth: context.width / 1.2,
+                                height: context.height / 15,
+                                color: Colors.green[900],
+                                onPressed: verify,
+                                child: const Text(
+                                  "VÉRIFIER",
+                                  style: TextStyle(
+                                    color: AppConstantsColor.lightTextColor,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                              )
+                        : _openPaygatePage
+                            ? MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                minWidth: context.width / 1.2,
+                                height: context.height / 15,
+                                color: Colors.red,
+                                onPressed: payV2,
+                                child: Text(
+                                  "PAYER V2 ${widget.shoe.price.formatted}",
+                                  style: const TextStyle(
+                                    color: AppConstantsColor.lightTextColor,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                              )
+                            : MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                minWidth: context.width / 1.2,
+                                height: context.height / 15,
+                                color: Colors.pink,
+                                onPressed: payV1,
+                                child: Text(
+                                  "PAYER V1 ${widget.shoe.price.formatted}",
+                                  style: const TextStyle(
+                                    color: AppConstantsColor.lightTextColor,
+                                    fontSize: 24,
+                                  ),
+                                ),
                               ),
-                            ),
-                          )
-                        : MaterialButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            minWidth: context.width / 1.2,
-                            height: context.height / 15,
-                            color: Colors.green[900],
-                            onPressed: verify,
-                            child: const Text(
-                              "VÉRIFIER",
-                              style: TextStyle(
-                                color: AppConstantsColor.lightTextColor,
-                                fontSize: 24,
-                              ),
-                            ),
-                          ),
                 const SizedBox(height: 50),
                 const Divider(
                   height: 10,
@@ -204,7 +259,7 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
                 Row(
                   children: [
                     SizedBox(
-                      width: context.width * 0.5,
+                      width: context.width * 0.45,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -225,36 +280,84 @@ class _PayShoeScreenState extends State<PayShoeScreen> {
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: context.width * 0.5,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            child: const Icon(Icons.payment),
-                            width: context.width * 0.1,
-                          ),
-                          const Text(
-                            "Status : ",
-                            style: TextStyle(fontSize: 24),
-                          ),
-                        ],
+                const SizedBox(height: 20),
+                if (_paygateResponse != null)
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: context.width * 0.45,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              child: const Icon(Icons.payment),
+                              width: context.width * 0.1,
+                            ),
+                            const Text(
+                              "Paiement : ",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      _paygateRequest == null
-                          ? "Initial"
-                          : _paygateResponse == null
-                              ? "En attente"
-                              : _paygateResponse!.status == 0
-                                  ? "En vérification"
-                                  : "Payé",
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ],
-                ),
+                      SizedBox(
+                        width: context.width * 0.5,
+                        child: Text(
+                          _paygateResponse!.status == null
+                              ? "Initialisation échouée"
+                              : _paygateResponse!.status!.label,
+                          style: const TextStyle(fontSize: 24),
+                        ).rich(
+                          context,
+                          maxLines: 2,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20),
+                if (_transaction != null)
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: context.width * 0.45,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              child: const Icon(Icons.payment),
+                              width: context.width * 0.1,
+                            ),
+                            const Text(
+                              "Vérification : ",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: context.width * 0.5,
+                        child: Text(
+                          _transaction == null
+                              ? "Initial"
+                              : _transaction!.status.label,
+                          style: const TextStyle(fontSize: 24),
+                        ).rich(
+                          context,
+                          maxLines: 2,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
